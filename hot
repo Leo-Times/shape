@@ -1,0 +1,125 @@
+namespace geometry;
+
+/** Any 2D figure. */
+public abstract class Figure {
+    /**
+     * Draws this figure onto canvas. The default implementation draws a line
+     * between each consecutive pair of points of the figure.
+     */
+    public abstract void Draw(Canvas canvas);
+}
+
+/** A closed polygon. */
+public class Polygon : Figure {
+    private Vector[] points;
+
+    public Polygon(params Vector[] points) {
+        this.points = points;
+    }
+    /** The sequence of points to be connected. */
+    protected virtual Vector[] Points() {
+        return points;
+    }
+
+    public override void Draw(Canvas canvas) {
+        Vector[] points = Points();
+        Vector last = points[points.Length - 1];
+        foreach (Vector v in Points()) {
+            canvas.Line(last, v);
+            last = v;
+        }
+    }
+}
+
+/** A square is also a polygon, but we save some space by only storing a corner and a side vector. */
+public class Square : Polygon {
+    private Vector corner, side;
+    public Square(Vector corner, Vector side) {
+        this.corner = corner;
+        this.side = side;
+    }
+
+    protected override Vector[] Points() {
+        // other side is perpendicular to side: [-y, x]
+        Vector perpendicular = new Vector(-side.Components[1], side.Components[0]);
+        return new Vector[] {corner, corner+side, corner+side+perpendicular, corner+perpendicular};
+    }
+}
+
+public class Rectangle : Polygon {
+    private Vector corner, side;
+    private int length;
+    public Rectangle(Vector corner, Vector side, int leng) {
+        this.corner = corner;
+        this.side = side;
+        this.length = leng;
+    }
+
+    protected override Vector[] Points() {
+        // other side is perpendicular to side: [-y, x]
+        Vector perpendicular = new Vector(-side.Components[1]-length, side.Components[0]+length);
+        return new Vector[] {corner, corner+side, corner+side+perpendicular, corner+perpendicular};
+    }
+}
+
+public class Paralelogram : Polygon {
+    private Vector corner, side;
+    private int length;
+    public Paralelogram(Vector corner, Vector side, int leng) {
+        this.corner = corner;
+        this.side = side;
+        this.length = leng;
+    }
+
+    protected override Vector[] Points() {
+        // other side is perpendicular to side: [-y, x]
+        Vector perpendicular = new Vector(-side.Components[1], side.Components[0]+length);
+        return new Vector[] {corner, corner+side, corner+side+perpendicular, corner+perpendicular};
+    }
+}
+
+public class Line : Polygon {
+    private Vector sidea, sideb;
+    public Line(Vector sidea, Vector sideb) {
+        this.sidea = sidea;
+        this.sideb = sideb;
+    }
+
+    protected override Vector[] Points() {
+        // other side is perpendicular to side: [-y, x]
+        return new Vector[] {sidea, sideb};
+    }
+}
+
+
+public class Octagon : Polygon
+{
+    private Vector corner, side;
+    private int sides;
+    private const int numPoints = 8;
+
+    public Octagon(Vector corner, Vector side, int sides)
+    {
+        this.corner = corner;
+        this.side = side;
+        this.sides = sides;
+    }
+
+    protected override Vector[] Points()
+    {
+        double magnitude = Math.Sqrt(Math.Pow(side.Components[1] - corner.Components[1], 2) + Math.Pow(side.Components[0] - corner.Components[0], 2));
+        Vector[] points = new Vector[sides];
+
+        for (int i = 0; i < sides; i++)
+        {
+            double angle = (i * (360/sides)) * (Math.PI / 180);
+            double posX = Math.Cos(angle) * magnitude/5 + 200;
+            double posY = Math.Sin(angle) * magnitude/5 + 200;
+
+            points[i] = new Vector(posX, posY);
+        }
+
+        
+        return points;
+    }
+}
